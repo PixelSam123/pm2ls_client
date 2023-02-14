@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   mic_stream: ^0.6.4
+  opus_dart: ^3.0.0
   opus_flutter: ^3.0.1
   web_socket_channel: ^2.3.0
 
