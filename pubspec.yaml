@@ -9,7 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  record: ^4.4.4
+  mic_stream: ^0.6.4
+  opus_flutter: ^3.0.1
+  web_socket_channel: ^2.3.0
 
 dev_dependencies:
   flutter_test:

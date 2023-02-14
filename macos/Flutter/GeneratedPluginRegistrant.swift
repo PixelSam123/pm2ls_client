@@ -5,8 +5,10 @@
 import FlutterMacOS
 import Foundation
 
-import record_macos
+import mic_stream
+import path_provider_foundation
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
-  RecordMacosPlugin.register(with: registry.registrar(forPlugin: "RecordMacosPlugin"))
+  MicStreamPlugin.register(with: registry.registrar(forPlugin: "MicStreamPlugin"))
+  PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))
 }
