@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:mic_stream/mic_stream.dart';
+import 'package:opus_dart/opus_dart.dart';
+import 'package:opus_flutter/opus_flutter.dart' as opus_flutter;
 import 'package:pm2ls_client/sizes.dart' as sizes;
+import 'package:web_socket_channel/web_socket_channel.dart';
 
-void main() {
+Future<void> main() async {
+  initOpus(await opus_flutter.load());
   runApp(const MainApp());
 }
 
 class MainApp extends StatelessWidget {
-  static const String _appName = 'pm2ls_client';
+  static const _appName = 'pm2ls_client';
 
   const MainApp({super.key});
 
@@ -37,8 +42,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final TextEditingController _host = TextEditingController();
-  final TextEditingController _port = TextEditingController();
+  final _host = TextEditingController();
+  final _port = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -100,5 +105,58 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+}
+
+class _WSAudioStreamConfig {
+  final int sampleRate;
+  final int channels;
+  final int app;
+  final int frameDuration;
+  final String serverAddress;
+  final int serverPort;
+
+  const _WSAudioStreamConfig({
+    this.sampleRate = 48000,
+    this.channels = 1,
+    this.app = 2048,
+    this.frameDuration = 20,
+    this.serverAddress = "127.0.0.2",
+    this.serverPort = 7619,
+  });
+}
+
+class _WSAudioStream {
+  final _WSAudioStreamConfig config;
+  var _muted = false;
+
+  _WSAudioStream(this.config);
+
+  Future<void> start() async {
+    final micStream = MicStream.microphone(
+      channelConfig: config.channels <= 1
+          ? ChannelConfig.CHANNEL_IN_MONO
+          : ChannelConfig.CHANNEL_IN_STEREO,
+      sampleRate: config.sampleRate,
+    );
+
+    final channel = WebSocketChannel.connect(Uri.parse(config.serverAddress));
+    final encodedAudioStream = (await micStream)!.cast<List<int>>().transform(
+          StreamOpusEncoder.bytes(
+            frameTime: FrameTime.ms20,
+            floatInput: false,
+            sampleRate: config.sampleRate,
+            channels: config.channels,
+            application: Application.voip,
+          ),
+        );
+
+    channel.sink.addStream(encodedAudioStream);
+  }
+
+  stop() {}
+
+  setMuted(bool muted) {
+    _muted = muted;
   }
 }
